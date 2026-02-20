@@ -143,59 +143,34 @@ Chosen because:
 
 This RAG implmentation and the integrated sysytem currently has the following limitations:
 
-### 1. Chunking Configuration
-In `doc_embedding.py`, chunk size is currently:
+### 1. LLM Output Limitations
 
-```python
-chunk_size=10
-chunk_overlap=5
-````
-
-This is too small and reduces retrieval quality.
-It creates too many tiny chunks and breaks meaning.
+This system uses embedding models and LLMs availbale locally in hugging face. Hence the performance of the LLMs and embedding models depends on the GPU performance of the local machine and might take a considerable time to embbed and store data as well as to query data and to show a output. 
 
 ---
 
-### 2. LLM Output Truncation
+### 2. Prompt Leakage
 
-In `query_vectorDB.py`:
-
-```python
-max_tokens: int = 20
-```
-
-This will cut answers too early and make outputs incomplete.
+The current pipeline may return parts of the prompt along with the answer because of the local AI models used. 
 
 ---
 
-### 3. Prompt Leakage
-
-The current pipeline may return parts of the prompt along with the answer because:
-
-```python
-outputs[0]["generated_text"]
-```
-
-includes the full generated sequence (prompt + output).
-
----
-
-### 4. No Document Deletion
+### 3. No Document Deletion
 
 Once a document is embedded into ChromaDB, there is no feature to delete it.
 
 ---
 
-### 5. Duplicate Detection Based Only on File Name
+### 4. Duplicate Detection Based Only on File Name
 
 Duplicate checking is done only by file name.
 If the same file is uploaded with a different name, it will be stored again.
 
 ---
 
-### 6. CPU-Only Inference
+### 5. CPU Only Inference
 
-Your pipeline uses:
+The LLM query pipeline uses:
 
 ```python
 device=-1
@@ -205,7 +180,8 @@ So the LLM runs on CPU. It will be slow for long answers.
 
 ---
 
-### 7. Chat History is Not Stored Permanently Across Multiple Sessions
+
+### 6. Chat History is Not Stored Permanently Across Multiple Sessions
 
 Streamlit session state stores conversations per browser session.
 If multiple users use it or if the same user refreshes the session, chat history will be reloaded.
