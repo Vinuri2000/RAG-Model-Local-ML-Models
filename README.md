@@ -36,46 +36,7 @@ This ensures answers are based on uploaded enterprise documents instead of rando
 
 ### High-Level Architecture Diagram (Text)
 
-```
-
-┌───────────────────────────┐
-│        Streamlit UI        │
-│  (app.py + chat_UI.py +    │
-│   upload_docs_UI.py)       │
-└──────────────┬────────────┘
-│ HTTP (REST)
-▼
-┌───────────────────────────┐
-│        FastAPI API         │
-│        (backend.py)        │
-│  /upload   /query          │
-└──────────────┬────────────┘
-│
-▼
-┌───────────────────────────┐
-│   Document Processing      │
-│   (doc_embedding.py)       │
-│ - load docs                │
-│ - chunk text               │
-│ - embed chunks             │
-└──────────────┬────────────┘
-│
-▼
-┌───────────────────────────┐
-│     Chroma Vector DB       │
-│  (persisted on disk)       │
-└──────────────┬────────────┘
-│
-▼
-┌───────────────────────────┐
-│     Query + Generation     │
-│    (query_vectorDB.py)     │
-│ - similarity search        │
-│ - build prompt             │
-│ - local LLM inference      │
-└───────────────────────────┘
-
-````
+![Enterprise Architecture](App/images/System_Architecture.png)
 
 ---
 
