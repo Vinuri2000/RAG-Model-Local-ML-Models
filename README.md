@@ -218,29 +218,25 @@ Recommended improvements for production-level usage:
 
 ### Retrieval Improvements
 
-* Use better chunking rules per file type
-* Add metadata filtering (e.g., by file, date, category)
-* Add re-ranking (cross encoder) for better accuracy
+* Try different similarity margin values and similarity search indexes and determine the most optimal size.
+* Add metadata filtering relevant to the question context.
 
 ### LLM Improvements
 
-* Enable GPU inference
-* Increase token output safely
-* Return only answer text (strip prompt)
+* Determine the most suitable and effcient embedding model and LLM by trying out different models.
+* Try out different maximum token sizes and determin the optimal max token size.
+* Return only answer text (strip prompt).
 
 ### Application Improvements
 
-* Add document delete + re-index features
-* Add authentication
-* Add chat history persistence (SQLite/PostgreSQL)
-* Add response streaming in chat UI
-* Add progress indicators for embedding stage
+* Add document delete option.
+* Add authentication to log into the system. 
+* Enable the chat history to store premanently.
 
 ### Data Safety Improvements
 
-* Add validation and file scanning
-* Add maximum upload size
-* Add rate limiting for API calls
+* Add validation and file scanning.
+* Extend the types of file formats that can be uploaded,
 
 ---
 
@@ -344,11 +340,10 @@ http://localhost:8501
 This system is built based on these assumptions:
 
 1. Users upload enterprise documents containing useful text content.
-2. Uploaded documents are safe and trusted (no malware scanning currently).
-3. The vector DB is local and persists in the machine running the backend.
-4. Document processing is done per upload batch.
-5. The system is intended for small-to-medium datasets (not millions of chunks).
-6. Query responses must be grounded in retrieved context only.
-
----
+2. Uploaded documents are safe and trusted as no malware scanning implemented.
+3. The vector DB is local and is in the machine running the backend.
+4. Document processing is done when a documents is uploaded.
+5. The system is intended for small to medium datasets and unable to run for millions of chunks as they rely on local models. 
+6. Chat history is only valid for a given session and not permanently. 
+7. One user is using the system at a time. 
 
