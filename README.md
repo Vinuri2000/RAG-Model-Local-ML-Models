@@ -38,7 +38,6 @@ This ensures answers are based on uploaded enterprise documents instead of rando
 
 ![Enterprise Architecture](App/images/System_Architecture.png)
 
----
 
 ## 3) Components Breakdown
 
