@@ -5,7 +5,7 @@ Enterprise Insight Engine is a document-driven analytical reasoning system that 
 - Upload enterprise documents (PDF, DOCX, CSV, XLSX, TXT, JSON)
 - Store them into a vector database (ChromaDB)
 - Ask questions via a chat interface
-- Retrieve answers generated using a local LLM, grounded only in retrieved document context
+- Retrieve answers generated using a local LLM, only in retrieved document context
 
 This project uses:
 - **Streamlit** (Frontend UI)
@@ -20,15 +20,15 @@ This project uses:
 
 The system follows a Retrieval-Augmented Generation (RAG) workflow:
 
-1. User uploads documents
-2. Documents are chunked and embedded
-3. Embeddings are stored in ChromaDB
-4. User asks a question
-5. Question is embedded and matched against stored chunks
-6. Top chunks are passed into the LLM as context
-7. LLM generates an answer using only that context
+1. User uploads documents.
+2. Documents are chunked and embedded.
+3. Embeddings are stored in ChromaDB.
+4. User asks a question.
+5. Question is embedded and matched against stored chunks using vector similarity comparison.
+6. Top chunks are passed into the LLM as context.
+7. LLM generates an answer using only that context.
 
-This ensures answers are based on uploaded enterprise documents instead of random model knowledge.
+This ensures answers are based on uploaded enterprise documents instead of random model knowledge of the LLM.
 
 ---
 
@@ -97,6 +97,7 @@ This ensures answers are based on uploaded enterprise documents instead of rando
 - `backend.py`
   Provides 2 endpoints:
   - `POST /upload` → processes and stores documents in vector DB
+
   - `POST /query` → performs retrieval + LLM generation
 
 ---
@@ -106,7 +107,7 @@ This ensures answers are based on uploaded enterprise documents instead of rando
   Loads documents, chunks them, generates embeddings, stores them in ChromaDB.
 
 - `query_vectorDB.py`
-  Embeds user query, retrieves top chunks from ChromaDB, builds a prompt, generates response with local LLM.
+  Embeds user's question, retrieves top chunks from ChromaDB using similarity search, builds a prompt, generates response with local LLM and retrieve the formattted response.
 
 ---
 
@@ -115,7 +116,6 @@ This ensures answers are based on uploaded enterprise documents instead of rando
 ### Embedding Model: `intfloat/e5-base-v2`
 Chosen because:
 - Strong semantic search performance
-- Works well for enterprise documents
 - Efficient enough to run locally
 - Produces high-quality dense embeddings
 
@@ -126,7 +126,7 @@ Chosen because:
 - Small enough to run locally on CPU
 - Good instruction-following ability
 - Fast compared to larger LLMs
-- Supports enterprise-style summarization and reasoning
+- Similar in summarization and reasoning to GPT models
 
 ---
 
@@ -141,7 +141,7 @@ Chosen because:
 
 ## 5) Limitations
 
-This system currently has the following limitations:
+This RAG implmentation and the integrated sysytem currently has the following limitations:
 
 ### 1. Chunking Configuration
 In `doc_embedding.py`, chunk size is currently:
@@ -205,10 +205,10 @@ So the LLM runs on CPU. It will be slow for long answers.
 
 ---
 
-### 7. Multi-User Persistence Issues
+### 7. Chat History is Not Stored Permanently Across Multiple Sessions
 
 Streamlit session state stores conversations per browser session.
-If multiple users use it, chat history is not stored permanently.
+If multiple users use it or if the same user refreshes the session, chat history will be reloaded.
 
 ---
 
@@ -249,13 +249,13 @@ Recommended improvements for production-level usage:
 ### Step 1: Clone Repository
 
 ```bash
-git clone <your_repo_url>
+git clone <repo_url>
 cd <your_project_folder>
 ```
 
 ---
 
-### Step 2: Create Virtual Environment (Recommended)
+### Step 2: Create Virtual Environment (This is the Recommended Approach) Or Run in the Global Python Environment
 
 #### Windows
 
@@ -286,22 +286,24 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```env
-CHROMA_DB_PATH=Chroma
-similarity_search_index=5
-SIMILARITY_MARGIN_VALUE=0.4
+CHROMA_DB_PATH = Chroma
+SIMILARITY_SEARCH_INDEX = 5
+SIMILARITY_MARGIN_VALUE = 0.7
 ```
 
 ### Meaning
 
 * `CHROMA_DB_PATH`: Folder where Chroma stores vectors
-* `similarity_search_index`: Number of top retrieved results
+* `SIMILARITY_SEARCH_INDEX`: Number of top retrieved results
 * `SIMILARITY_MARGIN_VALUE`: Minimum relevance score allowed
+
+Change the CHROMA_DB_PATH, SIMILARITY_SEARCH_INDEX, SIMILARITY_MARGIN_VALUE accordingly for your requiremnets and to have a high data accuracy and integrity.
 
 ---
 
 ## 9) How to Run the App
 
-You need to run **backend** and **frontend** in two terminals.
+You are required to run **backend** and **frontend** in two terminals.
 
 ---
 
@@ -322,6 +324,10 @@ http://127.0.0.1:8000
 ### Terminal 2: Start Streamlit Frontend
 
 ```bash
+streamlit cd App
+```
+
+```bash
 streamlit run app.py
 ```
 
@@ -333,72 +339,7 @@ http://localhost:8501
 
 ---
 
-## 10) Example API Calls
-
-### Upload Documents Endpoint
-
-**Endpoint**
-
-```
-POST /upload
-```
-
-**Example using curl**
-
-```bash
-curl -X POST "http://127.0.0.1:8000/upload" \
-  -F "files=@sample.pdf" \
-  -F "files=@budget.xlsx"
-```
-
-**Example response**
-
-```json
-{
-  "status": "success",
-  "duplicates": []
-}
-```
-
-If duplicates exist:
-
-```json
-{
-  "status": "duplicate",
-  "duplicates": ["sample.pdf"]
-}
-```
-
----
-
-### Query Endpoint
-
-**Endpoint**
-
-```
-POST /query
-```
-
-**Example using curl**
-
-```bash
-curl -X POST "http://127.0.0.1:8000/query" \
-  -H "Content-Type: application/json" \
-  -d "{\"question\": \"What is the total project cost?\"}"
-```
-
-**Example response**
-
-```json
-{
-  "status": "success",
-  "response": "The total project cost is 2,450,000 LKR.\n\n📂 Sources Utilized:\n    • budget.xlsx"
-}
-```
-
----
-
-## 11) Assumptions
+## 10) Assumptions
 
 This system is built based on these assumptions:
 
@@ -411,80 +352,3 @@ This system is built based on these assumptions:
 
 ---
 
-## 12) Trade-offs
-
-### Local Inference vs Cloud LLM
-
-✅ Pros:
-
-* Works offline
-* No API cost
-* More privacy for enterprise documents
-
-❌ Cons:
-
-* Slower on CPU
-* Lower quality compared to large cloud models
-* Limited context window
-
----
-
-### ChromaDB Local Storage vs Cloud Vector DB
-
-✅ Pros:
-
-* Easy setup
-* No external dependency
-* Fast local search
-
-❌ Cons:
-
-* Not ideal for multi-user cloud deployment
-* Scaling limitations
-
----
-
-### Duplicate Detection by File Name
-
-✅ Pros:
-
-* Very fast and simple
-
-❌ Cons:
-
-* Does not detect duplicate content with different file names
-
----
-
-## 13) Known Issues
-
-* Very small chunk size reduces answer quality
-* Very low token output truncates answers
-* Prompt may appear inside response
-* No UI feature to clear/reset vector DB
-
----
-
-## 14) License
-
-This project is currently for educational and internal use.
-
----
-
-## 15) Credits
-
-* Streamlit
-* FastAPI
-* HuggingFace Transformers
-* LangChain
-* ChromaDB
-
-```
-
----
-
-If you want, I can also generate for you:
-✅ a proper `.gitignore`  
-✅ a `run_backend.bat` + `run_frontend.bat` for one-click running on Windows  
-✅ improved code fixes (chunk size, token output, prompt stripping)
-```

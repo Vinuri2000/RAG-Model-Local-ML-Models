@@ -62,7 +62,7 @@ Question:
 
 
 # Define a local LLM inference
-def local_llm_inference(prompt: str, max_tokens: int = 20):
+def local_llm_inference(prompt: str, max_tokens: int = 200):
     outputs = text_gen(prompt, max_length=max_tokens, do_sample=True)
     return outputs[0]["generated_text"]
 

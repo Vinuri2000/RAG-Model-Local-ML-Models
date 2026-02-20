@@ -47,8 +47,8 @@ def load_documents(file_path):
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=10,
-        chunk_overlap=5,
+        chunk_size=500,
+        chunk_overlap=300,
         length_function=len,
         add_start_index=True,
     )
